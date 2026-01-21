@@ -64,21 +64,25 @@ async function geocode(addr) {
     // 3) cieľ
     const end = await geocode(data.end);
 
-    // 4) skladanie URL pre Mapy.cz
-    let url = "https://mapy.cz/zakladni?planovani-trasy&rc=1";
+    // 4) skladanie URL pre Google Maps
+    let url = "https://www.google.com/maps/dir/?api=1";
 
     // START
-    url += "&rs=" + start.lat + "%2C" + start.lon;
-
-    // ZASTÁVKY
-    stops.forEach(p => {
-      url += "&rs=" + p.lat + "%2C" + p.lon;
-    });
+    url += `&origin=${start.lat},${start.lon}`;
 
     // END
-    url += "&rs=" + end.lat + "%2C" + end.lon;
+    url += `&destination=${end.lat},${end.lon}`;
 
-    // 5) presmerovanie
+    // ZASTÁVKY
+    if (stops.length > 0) {
+      const wp = stops.map(p => `${p.lat},${p.lon}`).join("|");
+      url += `&waypoints=${wp}`;
+    }
+
+    // 5) režim navigácie
+    url += "&travelmode=driving";
+
+    // 6) presmerovanie
     window.location.href = url;
 
   } catch (e) {
