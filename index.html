@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8">
+  <title>Taxi Goral – Taxameter</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+  :root {
+    --bg: #111111;
+    --bg2: #1a1a1a;
+    --primary: #fdd835;  /* žltá */
+    --accent: #00c853;   /* zelená */
+    --danger: #e53935;   /* červená */
+    --pause: #ffb300;    /* oranžová */
+    --text: #ffffff;
+    --muted: #9e9e9e;
+    --border-radius: 10px;
+    --font-main: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    padding: 10px;
+    font-family: var(--font-main);
+    background: radial-gradient(circle at top, #333 0, #000 60%);
+    color: var(--text);
+  }
+
+  .app {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 10px;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 10px;
+  }
+
+  .logo {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+
+  .subtitle {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .card {
+    background: rgba(18, 18, 18, 0.95);
+    border-radius: var(--border-radius);
+    padding: 12px 14px;
+    margin-bottom: 12px;
+    border: 1px solid #333;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.6);
+  }
+
+  .card-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--primary);
+  }
+
+  .card-title .small {
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 400;
+  }
+
+  .gps-status {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .gps-coords {
+    font-size: 12px;
+    margin-top: 2px;
+    color: #b0bec5;
+  }
+
+  label {
+    font-size: 12px;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 3px;
+  }
+
+  input[type="text"],
+  input[type="number"] {
+    width: 100%;
+    padding: 7px 8px;
+    border-radius: 6px;
+    border: 1px solid #424242;
+    background: #101010;
+    color: var(--text);
+    font-size: 14px;
+    outline: none;
+  }
+
+  input:focus {
+    border-color: var(--primary);
+  }
+
+  .button {
+    width: 100%;
+    border: none;
+    outline: none;
+    border-radius: 999px;
+    padding: 10px 14px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    color: #000;
+    transition: transform 0.05s ease, box-shadow 0.05s ease, opacity 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .button:active {
+    transform: scale(0.97);
+  }
+
+  .button-primary {
+    background: var(--primary);
+    color: #000;
+    box-shadow: 0 2px 6px rgba(253, 216, 53, 0.4);
+  }
+
+  .button-accent {
+    background: var(--accent);
+    color: #000;
+    box-shadow: 0 2px 6px rgba(0, 200, 83, 0.4);
+  }
+
+  .button-pause {
+    background: var(--pause);
+    color: #000;
+    box-shadow: 0 2px 6px rgba(255, 179, 0, 0.4);
+  }
+
+  .button-danger {
+    background: var(--danger);
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(229, 57, 53, 0.4);
+  }
+
+  .button-secondary {
+    background: #263238;
+    color: var(--text);
+  }
+
+  .button:disabled {
+    opacity: 0.4;
+    cursor: default;
+    transform: none;
+  }
+
+  .small-btn {
+    width: auto;
+    padding: 4px 10px;
+    font-size: 11px;
+  }
+
+  .preview-price {
+    font-size: 20px;
+    font-weight: 600;
+    margin-top: 6px;
+  }
+
+  .preview-note {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .display-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .display-box {
+    background: #0d0d0d;
+    border-radius: 8px;
+    padding: 8px 10px;
+    border: 1px solid #333;
+  }
+
+  .display-label {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 3px;
+  }
+
+  .display-value {
+    font-size: 20px;
+    font-weight: 600;
+  }
+
+  .display-value.small {
+    font-size: 15px;
+  }
+
+  .price-box {
+    margin-top: 10px;
+    padding: 10px;
+    background: #0d0d0d;
+    border-radius: 8px;
+    border: 1px solid #333;
+  }
+
+  .price-main {
+    font-size: 28px;
+    font-weight: 700;
+    margin-top: 4px;
+  }
+
+  .row {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .state-indicator {
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .state-idle {
+    background: #263238;
+    color: #cfd8dc;
+  }
+
+  .state-driving {
+    background: rgba(0, 200, 83, 0.12);
+    color: var(--accent);
+    border: 1px solid rgba(0, 200, 83, 0.5);
+  }
+
+  .state-waiting {
+    background: rgba(255, 179, 0, 0.12);
+    color: var(--pause);
+    border: 1px solid rgba(255, 179, 0, 0.5);
+  }
+
+  .state-finished {
+    background: rgba(229, 57, 53, 0.12);
+    color: var(--danger);
+    border: 1px solid rgba(229, 57, 53, 0.5);
+  }
+
+  .footer {
+    margin-top: 10px;
+    text-align: center;
+    font-size: 10px;
+    color: var(--muted);
+  }
+</style>
+
+</head>
+
+<body>
+	
+	<div id="login-screen" style="display:none;">
+  <h2>Zadajte telefónne číslo</h2>
+  <input id="phone-input" type="text" placeholder="0900 000 000">
+  <button onclick="savePhone()">Pokračovať</button>
+</div>
+	
+<div class="app">
+
+  <!-- HLAVIČKA -->
+  <div class="header">
+    <div class="logo">Taxi Goral – Taxameter</div>
+    <div class="subtitle">Automatický výpočet · GPS · OSRM · Nominatim</div>
+  </div>
+
+  <!-- GPS POLOHA VODIČA -->
+  <div class="card">
+    <div class="card-title">
+      <span>Poloha vozidla (GPS)</span>
+      <button id="btnLocate" class="button button-secondary small-btn">Zamerať</button>
+    </div>
+    <div id="gpsStatus" class="gps-status">GPS zatiaľ nezamerané.</div>
+    <div id="gpsCoords" class="gps-coords"></div>
+  </div>
+
+  <!-- ADRESY PRE AUTOMATICKÝ VÝPOČET -->
+<div class="card">
+  <div class="card-title">
+    <span>Predbežná cena (automaticky)</span>
+    <span class="small">Dojazd 0.40 €/km · Jazda 0.85 €/km</span>
+  </div>
+
+  <!-- GPS tlačidlo pre nástup -->
+  <button id="btnSetStartFromGPS_auto" class="button button-secondary small-btn" style="margin-bottom:8px;">
+    Použiť moju polohu ako nástup
+  </button>
+
+  <label for="inputStart">Adresa nástupu</label>
+  <input id="inputStart" type="text" placeholder="napr. Krupina, Železničná 12">
+
+  <label for="inputEnd" style="margin-top:6px;">Adresa cieľa</label>
+  <input id="inputEnd" type="text" placeholder="napr. Dudince, Kúpele 3">
+
+  <!-- ZASTÁVKY -->
+  <label style="margin-top:6px;">Zastávky (voliteľné)</label>
+  <div id="stopsContainer"></div>
+
+  <button id="btnAddStop" class="button button-secondary small-btn" style="margin-top:4px;">
+    Pridať zastávku
+  </button>
+
+  <button id="btnCalcAuto" class="button button-primary" style="margin-top:8px;">
+    Vypočítať predbežnú cenu
+  </button>
+
+  <div id="autoPreview" class="preview-price">–.-- €</div>
+  <button id="btnNavigate" class="button button-secondary small-btn" style="margin-top:6px; display:none;">
+  Navigovať
+</button>
+
+  <div class="preview-note">
+    Výpočet prebehne automaticky cez GPS + Nominatim + OSRM.
+  </div>
+</div>
+
+
+
+  <!-- TAXAMETER -->
+  <div class="card">
+    <div class="card-title">
+      <span>Taxameter – živá jazda</span>
+      <span id="rideState" class="state-indicator state-idle">Pripravené</span>
+    </div>
+
+    <div class="display-grid">
+      <div class="display-box">
+        <div class="display-label">Prejdené km</div>
+        <div class="display-value">
+          <span id="valDistanceKm">0.00</span> km
+        </div>
+      </div>
+
+      <div class="display-box">
+        <div class="display-label">Čas jazdy</div>
+        <div class="display-value small" id="valDriveTime">00:00:00</div>
+      </div>
+
+      <div class="display-box">
+        <div class="display-label">Čas čakania</div>
+        <div class="display-value small" id="valWaitTime">00:00:00</div>
+      </div>
+
+      <div class="display-box">
+        <div class="display-label">Cena čakania</div>
+        <div class="display-value">
+          <span id="valWaitPrice">0.00</span> €
+        </div>
+      </div>
+    </div>
+
+    <div class="price-box">
+      <div class="display-label">Celková cena</div>
+      <div class="price-main">
+        <span id="valTotalPrice">0.00</span> €
+      </div>
+    </div>
+
+	<div class="row">
+  <button id="btnSetStartFromGPS" class="button button-secondary">
+    Nastaviť začiatok jazdy z GPS
+  </button>
+</div>
+
+	
+    <div class="row">
+      <button id="btnStart" class="button button-accent">Štart</button>
+      <button id="btnPause" class="button button-pause" disabled>Pauza</button>
+      <button id="btnEnd" class="button button-danger" disabled>Koniec</button>
+    </div>
+
+    <div class="row">
+      <button id="btnReset" class="button button-secondary">Reset</button>
+    </div>
+  </div>
+
+  <!-- SUMÁR -->
+<div class="card">
+  <div class="card-title">
+    <span>Sumár poslednej jazdy</span>
+  </div>
+
+  <div id="summaryBox" class="preview-note">
+    Zatiaľ nie je ukončená žiadna jazda.
+  </div>
+</div>
+
+<!-- NASTAVENIA TARÍF – JEDINÝ BLOK -->
+<div class="card">
+  <div class="card-title">Nastavenia taríf</div>
+
+  <label>Názov tarify</label>
+  <input id="tariffName" type="text" placeholder="napr. Denná">
+
+  <label>Cena jazdy (€/km)</label>
+  <input id="tariffKm" type="number" step="0.01" placeholder="napr. 0.85">
+
+  <label>Cena čakania (€/min)</label>
+  <input id="tariffWait" type="number" step="0.01" placeholder="napr. 0.30">
+
+  <button id="btnAddTariff" class="button button-primary" style="margin-top:10px;">
+    Pridať / uložiť tarifu
+  </button>
+
+  <label style="margin-top:10px;">Aktívna tarifa</label>
+  <select id="activeTariff"></select>
+
+  <div id="tariffList" class="preview-note" style="margin-top:10px;">
+    Žiadne tarify zatiaľ nie sú uložené.
+  </div>
+</div>
+
+
+<script>
+// ======================
+// SADZBY – FALLBACK
+// ======================
+const RATE_DOJAZD_FALLBACK = 0.40; // €/km
+const RATE_KM_FALLBACK     = 0.85; // €/km
+const RATE_WAIT_FALLBACK   = 0.30; // €/min
+
+// ======================
+// STAVY
+// ======================
+const STATE_IDLE     = "IDLE";
+const STATE_DRIVING  = "DRIVING";
+const STATE_WAITING  = "WAITING";
+const STATE_FINISHED = "FINISHED";
+
+let rideState = STATE_IDLE;
+
+// ======================
+// PREMENNÉ
+// ======================
+let rideStartCoords = null;
+let previewDojazdKm    = 0;
+let previewJazdaKm     = 0;
+let previewDojazdPrice = 0;
+let previewJazdaPrice  = 0;
+
+let distanceKm   = 0;
+let driveSeconds = 0;
+let waitSeconds  = 0;
+
+let gpsWatchId = null;
+let lastPos    = null;
+let timer      = null;
+
+// ======================
+// DOM prvky
+// ======================
+const gpsStatus     = document.getElementById("gpsStatus");
+const gpsCoords     = document.getElementById("gpsCoords");
+const inputStart    = document.getElementById("inputStart");
+const inputEnd      = document.getElementById("inputEnd");
+const autoPreview   = document.getElementById("autoPreview");
+const valDistanceKm = document.getElementById("valDistanceKm");
+const valDriveTime  = document.getElementById("valDriveTime");
+const valWaitTime   = document.getElementById("valWaitTime");
+const valWaitPrice  = document.getElementById("valWaitPrice");
+const valTotalPrice = document.getElementById("valTotalPrice");
+const rideStateEl   = document.getElementById("rideState");
+const summaryBox    = document.getElementById("summaryBox");
+
+function setStartFromGPS() {
+  if (!navigator.geolocation) {
+    alert("GPS nie je podporované.");
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(pos => {
+    rideStartCoords = {
+      lat: pos.coords.latitude,
+      lon: pos.coords.longitude
+    };
+    console.log("Začiatok jazdy nastavený na:", rideStartCoords);
+    const state = document.getElementById("rideState");
+    if (state) {
+      state.textContent = "Začiatok jazdy nastavený";
+      state.classList.remove("state-idle");
+      state.classList.add("state-active");
+    }
+  }, err => {
+    alert("Nepodarilo sa získať GPS polohu.");
+  });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const btnSetStart = document.getElementById("btnSetStartFromGPS");
+  if (btnSetStart) {
+    btnSetStart.onclick = setStartFromGPS;
+  }
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  const btnAuto = document.getElementById("btnSetStartFromGPS_auto");
+  if (btnAuto) {
+    btnAuto.onclick = () => {
+      if (!navigator.geolocation) {
+        alert("GPS nie je podporované.");
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(pos => {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+
+        const input = document.getElementById("inputStart");
+        if (input) {
+          input.value = `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
+        }
+
+        console.log("Predbežný nástup nastavený na GPS:", lat, lon);
+      }, err => {
+        alert("Nepodarilo sa získať GPS polohu.");
+      });
+    };
+  }
+});
+
+
+// ======================
+// TARIFY – LOCALSTORAGE
+// ======================
+function loadTariffs() {
+  return JSON.parse(localStorage.getItem("tariffs") || "[]");
+}
+
+function saveTariffs(list) {
+  localStorage.setItem("tariffs", JSON.stringify(list));
+}
+
+function renderTariffs() {
+  const list = loadTariffs();
+  const box  = document.getElementById("tariffList");
+
+  if (!box) return;
+
+  box.innerHTML = "";
+
+  if (!list.length) {
+    box.textContent = "Žiadne tarify zatiaľ nie sú uložené.";
+    return;
+  }
+
+  list.forEach((t, i) => {
+    const row = document.createElement("div");
+    row.style.margin = "6px 0";
+    row.innerHTML = `
+      <strong>${t.name}</strong> – ${t.km} €/km, ${t.wait} €/min
+      <button data-i="${i}" class="button small-btn button-danger" style="margin-left:8px;">X</button>
+    `;
+    box.appendChild(row);
+  });
+
+  box.querySelectorAll("button").forEach(btn => {
+    btn.onclick = () => {
+      const i = parseInt(btn.dataset.i);
+      const list = loadTariffs();
+      list.splice(i, 1);
+      saveTariffs(list);
+
+      // JEDINÉ správne volania
+      renderTariffs();
+      renderActiveTariffSelector();
+      updateDisplays();
+    };
+  });
+}
+
+
+function renderActiveTariffSelector() {
+  const list = loadTariffs();
+  const sel  = document.getElementById("activeTariff");
+  if (!sel) return;
+
+  sel.innerHTML = "";
+
+  list.forEach((t, i) => {
+    const opt = document.createElement("option");
+    opt.value = i;
+    opt.textContent = t.name;
+    sel.appendChild(opt);
+  });
+
+  if (list.length > 0) sel.value = "0";
+
+  sel.onchange = () => {
+    updateDisplays();
+  };
+}
+
+document.getElementById("btnAddTariff").onclick = () => {
+  const name = document.getElementById("tariffName").value.trim();
+  const km   = parseFloat(document.getElementById("tariffKm").value);
+  const wait = parseFloat(document.getElementById("tariffWait").value);
+
+  if (!name || isNaN(km) || isNaN(wait)) {
+    alert("Vyplň všetky polia.");
+    return;
+  }
+
+  const list = loadTariffs();
+  list.push({ name, km, wait });
+  saveTariffs(list);
+
+  document.getElementById("tariffName").value = "";
+  document.getElementById("tariffKm").value   = "";
+  document.getElementById("tariffWait").value = "";
+
+  renderTariffs();
+  renderActiveTariffSelector();
+  updateDisplays();
+};
+
+function getActiveTariff() {
+  const list = loadTariffs();
+  const sel  = document.getElementById("activeTariff");
+  if (!sel) return null;
+
+  const index = parseInt(sel.value);
+  if (isNaN(index) || !list[index]) return null;
+
+  return list[index];
+}
+
+
+// ======================
+// SADZBY Z AKTÍVNEJ TARIFY
+// ======================
+function getRates() {
+  const t = getActiveTariff();
+  return {
+    km:   t ? t.km   : RATE_KM_FALLBACK,
+    wait: t ? t.wait : RATE_WAIT_FALLBACK
+  };
+}
+
+// ======================
+// FORMÁT ČASU
+// ======================
+function fmt(sec) {
+  const h = Math.floor(sec / 3600);
+  const m = Math.floor((sec % 3600) / 60);
+  const s = sec % 60;
+  return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+}
+
+// ======================
+// HAVERSINE
+// ======================
+function dist(lat1, lon1, lat2, lon2) {
+  const R = 6371000;
+  const toRad = d => d * Math.PI / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a = Math.sin(dLat/2)**2 +
+            Math.cos(toRad(lat1))*Math.cos(toRad(lat2)) *
+            Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+// ======================
+// UPDATE DISPLEJOV
+// ======================
+function updateDisplays() {
+  const r = getRates();
+
+  valDistanceKm.textContent = distanceKm.toFixed(2);
+  valDriveTime.textContent  = fmt(driveSeconds);
+  valWaitTime.textContent   = fmt(waitSeconds);
+
+  const waitMin   = waitSeconds / 60;
+  const waitPrice = waitMin * r.wait;
+  valWaitPrice.textContent  = waitPrice.toFixed(2);
+
+  const ridePrice = distanceKm * r.km;
+  const total     = previewDojazdPrice + ridePrice + waitPrice;
+
+  valTotalPrice.textContent = total.toFixed(2);
+}
+
+// ======================
+// STAVOVÝ INDIKÁTOR
+// ======================
+function setState(s) {
+  rideState = s;
+  rideStateEl.className = "state-indicator";
+
+  if (s === STATE_IDLE) {
+    rideStateEl.textContent = "Pripravené";
+    rideStateEl.classList.add("state-idle");
+  }
+  if (s === STATE_DRIVING) {
+    rideStateEl.textContent = "Jazda";
+    rideStateEl.classList.add("state-driving");
+  }
+  if (s === STATE_WAITING) {
+    rideStateEl.textContent = "Čakanie";
+    rideStateEl.classList.add("state-waiting");
+  }
+  if (s === STATE_FINISHED) {
+    rideStateEl.textContent = "Ukončené";
+    rideStateEl.classList.add("state-finished");
+  }
+}
+
+// ======================
+// GPS WATCH
+// ======================
+function startGPS() {
+  if (!navigator.geolocation) {
+    gpsStatus.textContent = "GPS nepodporované.";
+    return;
+  }
+
+  gpsStatus.textContent = "Sledujem polohu...";
+
+  gpsWatchId = navigator.geolocation.watchPosition(pos => {
+    const lat = pos.coords.latitude;
+    const lon = pos.coords.longitude;
+
+    gpsCoords.textContent = `Lat: ${lat.toFixed(6)}, Lon: ${lon.toFixed(6)}`;
+
+    if (lastPos && rideState === STATE_DRIVING) {
+      const d = dist(lastPos.lat, lastPos.lon, lat, lon);
+      if (d > 1) distanceKm += d / 1000;
+      updateDisplays();
+    }
+
+    lastPos = { lat, lon };
+  }, err => {
+    gpsStatus.textContent = "Chyba GPS: " + err.message;
+  }, {
+    enableHighAccuracy: true,
+    maximumAge: 1000,
+    timeout: 10000
+  });
+}
+
+function stopGPS() {
+  if (gpsWatchId !== null) {
+    navigator.geolocation.clearWatch(gpsWatchId);
+    gpsWatchId = null;
+  }
+}
+
+document.getElementById("btnNavigate").onclick = () => {
+  const stops = Array.from(document.querySelectorAll(".stop-input"))
+                     .map(i => i.value.trim())
+                     .filter(v => v.length > 0);
+
+  const payload = {
+    start: inputStart.value.trim(),
+    stops: stops,
+    end: inputEnd.value.trim()
+  };
+
+  const url = "navigation.html?data=" + encodeURIComponent(JSON.stringify(payload));
+  window.location.href = url;
+};
+
+
+
+// ======================
+// GPS ZAMERANIE
+// ======================
+document.getElementById("btnLocate").onclick = () => {
+  if (!navigator.geolocation) {
+    gpsStatus.textContent = "GPS nepodporované.";
+    return;
+  }
+
+  gpsStatus.textContent = "Zameriavam...";
+
+  navigator.geolocation.getCurrentPosition(pos => {
+    lastPos = {
+      lat: pos.coords.latitude,
+      lon: pos.coords.longitude
+    };
+    gpsStatus.textContent = "Poloha zameraná.";
+    gpsCoords.textContent = `Lat: ${lastPos.lat.toFixed(6)}, Lon: ${lastPos.lon.toFixed(6)}`;
+  }, err => {
+    gpsStatus.textContent = "Chyba: " + err.message;
+  }, {
+    enableHighAccuracy: true,
+    timeout: 10000
+  });
+};
+
+// ======================
+// GEOKÓDOVANIE (Nominatim)
+// ======================
+async function geocode(addr) {
+  const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(addr)}`;
+  const r = await fetch(url);
+  const j = await r.json();
+  if (j.length === 0) throw new Error("Adresa nenájdená");
+  return {
+    lat: parseFloat(j[0].lat),
+    lon: parseFloat(j[0].lon)
+  };
+}
+
+// ======================
+// OSRM TRASA
+// ======================
+async function route(a, b) {
+  const url = `https://router.project-osrm.org/route/v1/driving/${a.lon},${a.lat};${b.lon},${b.lat}?overview=false`;
+  const r = await fetch(url);
+  const j = await r.json();
+  if (!j.routes) throw new Error("OSRM chyba");
+  return j.routes[0].distance / 1000; // km
+}
+
+// ======================
+// AUTOMATICKÝ VÝPOČET CENY – VRÁTANE ZASTÁVOK
+// ======================
+
+// UI prvky
+const stopsContainer = document.getElementById("stopsContainer");
+const btnAddStop     = document.getElementById("btnAddStop");
+
+// Pridanie novej zastávky
+if (btnAddStop && stopsContainer) {
+  btnAddStop.onclick = () => {
+    const idx = stopsContainer.children.length + 1;
+    const wrap = document.createElement("div");
+    wrap.style.marginTop = "4px";
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.placeholder = `Zastávka ${idx} – napr. Sebechleby, centrum`;
+    input.className = "stop-input";
+
+    wrap.appendChild(input);
+    stopsContainer.appendChild(wrap);
+  };
+}
+
+// Geokódovanie
+async function geocode(addr) {
+  const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(addr)}`;
+  const r = await fetch(url);
+  const j = await r.json();
+  if (j.length === 0) throw new Error("Adresa nenájdená");
+  return {
+    lat: parseFloat(j[0].lat),
+    lon: parseFloat(j[0].lon)
+  };
+}
+
+// OSRM trasa
+async function route(a, b) {
+  const url = `https://router.project-osrm.org/route/v1/driving/${a.lon},${a.lat};${b.lon},${b.lat}?overview=false`;
+  const r = await fetch(url);
+  const j = await r.json();
+  if (!j.routes) throw new Error("OSRM chyba");
+  return j.routes[0].distance / 1000; // km
+}
+
+// Hlavný výpočet
+document.getElementById("btnCalcAuto").onclick = async () => {
+  const startAddr = inputStart.value.trim();
+  const endAddr   = inputEnd.value.trim();
+
+  if (!startAddr || !endAddr) {
+    autoPreview.textContent = "Zadaj obe adresy.";
+    return;
+  }
+
+  autoPreview.textContent = "Počítam...";
+
+  try {
+    if (!lastPos) {
+      autoPreview.textContent = "Najprv zameraj GPS vozidla.";
+      return;
+    }
+
+    // 1) vodič → nástup
+    const driver = { lat: lastPos.lat, lon: lastPos.lon };
+    const start  = await geocode(startAddr);
+
+    const dojazdKm = await route(driver, start);
+
+    // 2) nástup → zastávky → cieľ
+    const stops = Array.from(document.querySelectorAll(".stop-input"))
+                       .map(i => i.value.trim())
+                       .filter(v => v.length > 0);
+
+    const points = [start];
+
+    for (let s of stops) {
+      points.push(await geocode(s));
+    }
+
+    const end = await geocode(endAddr);
+    points.push(end);
+
+    // Výpočet všetkých úsekov
+    let jazdaKm = 0;
+    for (let i = 0; i < points.length - 1; i++) {
+      jazdaKm += await route(points[i], points[i+1]);
+    }
+
+    // Uloženie pre taxameter
+    previewDojazdKm = dojazdKm;
+    previewJazdaKm  = jazdaKm;
+
+    const r = getRates();
+
+    previewDojazdPrice = dojazdKm * RATE_DOJAZD_FALLBACK;
+    previewJazdaPrice  = jazdaKm  * r.km;
+
+    const total = previewDojazdPrice + previewJazdaPrice;
+
+    autoPreview.textContent = total.toFixed(2) + " €";
+	document.getElementById("btnNavigate").style.display = "block";
+
+
+    updateDisplays();
+
+  } catch (e) {
+    autoPreview.textContent = "Chyba: " + e.message;
+  }
+};
+
+
+// ======================
+// TAXAMETER – ŠTART
+// ======================
+document.getElementById("btnStart").onclick = () => {
+  if (rideState !== STATE_IDLE && rideState !== STATE_FINISHED) return;
+
+  distanceKm   = 0;
+  driveSeconds = 0;
+  waitSeconds  = 0;
+
+  setState(STATE_DRIVING);
+  updateDisplays();
+
+  document.getElementById("btnStart").disabled = true;
+  document.getElementById("btnPause").disabled = false;
+  document.getElementById("btnEnd").disabled   = false;
+
+  startGPS();
+
+  timer = setInterval(() => {
+    if (rideState === STATE_DRIVING) driveSeconds++;
+    if (rideState === STATE_WAITING) waitSeconds++;
+    updateDisplays();
+  }, 1000);
+};
+
+// ======================
+// TAXAMETER – PAUZA
+// ======================
+document.getElementById("btnPause").onclick = () => {
+  if (rideState === STATE_DRIVING) setState(STATE_WAITING);
+  else if (rideState === STATE_WAITING) setState(STATE_DRIVING);
+};
+
+// ======================
+// TAXAMETER – KONIEC
+// ======================
+document.getElementById("btnEnd").onclick = () => {
+  if (rideState === STATE_IDLE) return;
+
+  setState(STATE_FINISHED);
+
+  clearInterval(timer);
+  stopGPS();
+
+  const r = getRates();
+
+  const waitMin   = waitSeconds / 60;
+  const waitPrice = waitMin * r.wait;
+  const ridePrice = distanceKm * r.km;
+
+  const total = previewDojazdPrice + ridePrice + waitPrice;
+
+  summaryBox.innerHTML = `
+    <div><strong>Dojazd:</strong> ${previewDojazdKm.toFixed(2)} km → ${previewDojazdPrice.toFixed(2)} €</div>
+    <div><strong>Jazda:</strong> ${distanceKm.toFixed(2)} km → ${ridePrice.toFixed(2)} €</div>
+    <div><strong>Čakanie:</strong> ${waitMin.toFixed(1)} min → ${waitPrice.toFixed(2)} €</div>
+    <div><strong>Celkom:</strong> ${total.toFixed(2)} €</div>
+  `;
+
+  document.getElementById("btnPause").disabled = true;
+  document.getElementById("btnEnd").disabled   = true;
+};
+
+// ======================
+// RESET
+// ======================
+document.getElementById("btnReset").onclick = () => {
+  clearInterval(timer);
+  stopGPS();
+
+  distanceKm   = 0;
+  driveSeconds = 0;
+  waitSeconds  = 0;
+
+  previewDojazdKm    = 0;
+  previewJazdaKm     = 0;
+  previewDojazdPrice = 0;
+  previewJazdaPrice  = 0;
+
+  autoPreview.textContent = "–.-- €";
+  summaryBox.textContent  = "Zatiaľ nie je ukončená žiadna jazda.";
+
+  setState(STATE_IDLE);
+  updateDisplays();
+
+  document.getElementById("btnStart").disabled = false;
+  document.getElementById("btnPause").disabled = true;
+  document.getElementById("btnEnd").disabled   = true;
+};
+
+// ======================
+// INIT
+// ======================
+setState(STATE_IDLE);
+renderTariffs();
+renderActiveTariffSelector();
+updateDisplays();
+</script>
+
+<script src="autocomplete.js"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+<script>
+  const SUPABASE_URL = 'https://jjiqkmfcicylmojofnic.supabase.co/';
+  const SUPABASE_KEY = 'sb_publishable_gAQ0kXMu4xKDEXFG_z562A_g6SWzJ4H';
+
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const savedPhone = localStorage.getItem("user_phone");
+
+    if (!savedPhone) {
+      document.getElementById("login-screen").style.display = "block";
+    } else {
+      verifyUser(savedPhone);
+    }
+  });
+
+  function savePhone() {
+    const phone = document.getElementById("phone-input").value;
+    localStorage.setItem("user_phone", phone);
+    verifyUser(phone);
+  }
+
+  async function verifyUser(phone) {
+    const imei = "TEST_IMEI_12345"; // dočasné
+
+    const { data, error } = await supabase
+      .from("users")
+      .select("*")
+      .eq("phone", phone)
+      .single();
+
+    if (error || !data) {
+      alert("Užívateľ neexistuje");
+      return;
+    }
+
+    if (data.status === "blocked") {
+      alert("Prístup zamietnutý");
+      return;
+    }
+
+    if (!data.imei) {
+      await supabase
+        .from("users")
+        .update({ imei: imei })
+        .eq("phone", phone);
+
+      document.getElementById("login-screen").style.display = "none";
+      document.getElementById("app").style.display = "block";
+      return;
+    }
+
+    if (data.imei !== imei) {
+      alert("Toto číslo je už používané na inom zariadení");
+      return;
+    }
+
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("app").style.display = "block";
+  }
+</script>
+
+
+
+
+</body>
+</html>
