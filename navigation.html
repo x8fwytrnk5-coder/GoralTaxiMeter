@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<title>Navigácia</title>
+<style>
+  body {
+    background: #111;
+    color: #eee;
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    text-align: center;
+  }
+  .msg {
+    margin-top: 40px;
+    font-size: 20px;
+  }
+</style>
+</head>
+
+<body>
+<h2>Pripravujem navigáciu…</h2>
+<div class="msg">Prosím čakaj, prebieha geokódovanie.</div>
+
+<script>
+// Načítanie dát z URL
+const params = new URLSearchParams(window.location.search);
+const dataRaw = params.get("data");
+
+if (!dataRaw) {
+  document.querySelector(".msg").textContent = "Chýbajú dáta z indexu.";
+  throw new Error("No data");
+}
+
+const data = JSON.parse(dataRaw);
+
+// Geokódovanie adries → GPS
+async function geocode(addr) {
+  const url = "https://nominatim.openstreetmap.org/search?format=json&limit=1&q=" 
+              + encodeURIComponent(addr);
+
+  const r = await fetch(url);
+  const j = await r.json();
+
+  if (!j.length) throw new Error("Adresa nenájdená: " + addr);
+
+  return {
+    lat: j[0].lat,
+    lon: j[0].lon
+  };
+}
+
+(async () => {
+  try {
+    // 1) nástup
+    const start = await geocode(data.start);
+
+    // 2) zastávky
+    const stops = [];
+    for (let s of data.stops) {
+      stops.push(await geocode(s));
+    }
+
+    // 3) cieľ
+    const end = await geocode(data.end);
+
+    // 4) skladanie URL pre Mapy.cz
+    let url = "https://mapy.cz/zakladni?planovani-trasy&rc=1";
+
+    // START
+    url += "&rs=" + start.lat + "%2C" + start.lon;
+
+    // ZASTÁVKY
+    stops.forEach(p => {
+      url += "&rs=" + p.lat + "%2C" + p.lon;
+    });
+
+    // END
+    url += "&rs=" + end.lat + "%2C" + end.lon;
+
+    // 5) presmerovanie
+    window.location.href = url;
+
+  } catch (e) {
+    document.querySelector(".msg").textContent = "Chyba: " + e.message;
+  }
+})();
+</script>
+
+</body>
+</html>
